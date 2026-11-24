@@ -398,9 +398,11 @@ function unifiedEdits(lines: string[], strict: boolean): Edit[] {
     const creation = oldPath === '/dev/null' || s.newMode;
     const deletion = newPath === '/dev/null' || s.delMode;
     return (tree: Tree) => {
-      // Every path the edit names is safety-checked before anything else (section 10).
-      if (!creation && oldPath !== null && oldPath !== '/dev/null' && !safe(oldPath)) throw new Fail('unsafe', oldPath);
-      if (!deletion && newPath !== null && newPath !== '/dev/null' && !safe(newPath)) throw new Fail('unsafe', newPath);
+      // Every path the edit names is safety-checked before anything else (section 10),
+      // on creations and deletions too: a named path that is not /dev/null is checked
+      // whichever side of the edit it stands on.
+      if (oldPath !== null && oldPath !== '/dev/null' && !safe(oldPath)) throw new Fail('unsafe', oldPath);
+      if (newPath !== null && newPath !== '/dev/null' && !safe(newPath)) throw new Fail('unsafe', newPath);
       if (creation) {
         const p = newPath!;
         if (tree.get(p) !== null) throw new Fail('exists', p);
